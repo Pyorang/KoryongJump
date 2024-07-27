@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEditor.Search;
 
 public class ShopUIScript : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class ShopUIScript : MonoBehaviour
     public Image SelectedCharacterSprite;
     [SerializeField]
     public Image LockPlayerImage;
+    [SerializeField]
+    public TMPro.TextMeshProUGUI UnlockCost;
 
     [SerializeField]
     public TMPro.TextMeshProUGUI PerkDescreption;
@@ -31,6 +34,12 @@ public class ShopUIScript : MonoBehaviour
     [SerializeField]
     public Button BuyButton;
 
+    [SerializeField]
+    public Button[] PerkSelectButton;//퍽 선택 버튼(4개)
+
+    [SerializeField]
+    public TMPro.TextMeshProUGUI currentCoin;
+
     public DummyPlayerData PlayerData;//CurrentSelectedCharacterIndex, CharacterUnlockedList, PerkUnlockedList, CurrentCoin를 가져온다
     public DummyDataList DataList;// 퍽과 캐릭터 데이터 리스트를 가져온다.
 
@@ -38,7 +47,8 @@ public class ShopUIScript : MonoBehaviour
     public int currentPerkIndexA;
     public int currentPerkIndexB;
 
-    public int LastUpdatedPerk;
+    public int LastSelectedPerk;
+    public int LastUpdatedPerkPosition;    
 
     public Image[] CharacterImages;
     public Image[] PerkImages;
@@ -62,7 +72,8 @@ public class ShopUIScript : MonoBehaviour
         currentPerkIndexA = PlayerData.currentPerkIndexA;
         currentPerkIndexB = PlayerData.currentPerkIndexB;
 
-        LastUpdatedPerk = 0;
+        LastUpdatedPerkPosition = -1;
+        LastSelectedPerk = -1;
 
         GoToMainButton.onClick.AddListener(OnGoToMenuButtonClicked);
         NextCharacterSelectButton.onClick.AddListener(OnNextCharacterSelectButtonClicked);
@@ -73,7 +84,7 @@ public class ShopUIScript : MonoBehaviour
 
 
         UpdateUI();
-    
+
     }
 
     void UpdateUI()
@@ -84,12 +95,14 @@ public class ShopUIScript : MonoBehaviour
 
         bool isCharacterUnlocked = PlayerData.AvailableCharacter[currentCharacterIndex];
         LockPlayerImage.gameObject.SetActive(!isCharacterUnlocked);
+        UnlockCost.text = currentCharacter.cost.ToString();
 
+        //캐릭터 상태 변경
         CharacterName.text = currentCharacter.name;
         SelectedCharacterSprite = currentCharacter.image;
 
 
-
+        //구매 버튼 상태 변경
         TextMeshProUGUI buttonText = BuyButton.gameObject.GetComponentInChildren<TextMeshProUGUI>();
 
 
@@ -117,6 +130,13 @@ public class ShopUIScript : MonoBehaviour
             BuyButton.interactable = true;
         }
 
+        //퍽 상태 변경
+
+
+
+
+        currentCoin.text = PlayerData.currentCoin.ToString();
+
     }
 
     void OnGoToMenuButtonClicked()
@@ -143,10 +163,7 @@ public class ShopUIScript : MonoBehaviour
     {
         
         
-        PlayerData.currentCharacterIndex = currentCharacterIndex;
-
-        UpdateUI();
-        Debug.Log("캐릭터 변경함");
+        HandleCharacterSelection();
     }
 
     void OnBuyButtonClicked()
@@ -157,12 +174,11 @@ public class ShopUIScript : MonoBehaviour
         if (PlayerData.currentCoin >= currentCharacter.cost)
         {
             PlayerData.currentCoin -= currentCharacter.cost;
-            PlayerData.currentCharacterIndex = currentCharacterIndex;
             PlayerData.AvailableCharacter[currentCharacterIndex] = true;
 
-            Debug.Log("캐릭터 구매함");
+            HandleCharacterSelection();
 
-            UpdateUI();
+            Debug.Log("캐릭터 구매함");
 
         }
         else
@@ -173,13 +189,82 @@ public class ShopUIScript : MonoBehaviour
         
     }
 
-    
 
-
-
-    // Update is called once per frame
-    void Update()
+    void UpdatePerkSelectButton(int[] index) //퍽 인덱스를 받아서 각각 업데이트한다.
     {
-        
+        for (int i = 0; i < index.Length; i++)
+        {
+
+            PerkSelectButton[i].onClick.RemoveAllListeners();
+
+            if (index[i] == -1)
+            {
+                //퍽 정보 없음.
+
+                PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "None";
+                PerkSelectButton[i].interactable = false;
+            }
+            else
+            {
+
+                if (currentPerkIndexA == index[i] || currentPerkIndexB == index[i])//이미 선택된 퍽인 경우
+                {
+                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkDisableButtonClicked(index[i]); });
+                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Disable";
+                }
+                else if (!PlayerData.AvailablePerk[index[i]] && LastSelectedPerk != index[i])//없는 퍽이고 선택하지 않은 경우
+                {
+                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkChooseButtonClicked(index[i]); });
+                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = DataList.allPerk[index[i]].Name;
+                }
+                else if (!PlayerData.AvailablePerk[index[i]])//없는 퍽이고 한번 더 누른 경우
+                {
+                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkBuyButtonClicked(index[i]); });
+                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = DataList.allPerk[index[i]].Cost.ToString();
+                }
+                else//누른 적 없지만 가지고 있는 퍽인 경우
+                {
+                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkSelectButtonClicked(index[i]); });
+                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Enable";
+                }
+
+                PerkSelectButton[i].interactable = true;
+            }
+        }
     }
+
+    void OnPerkSelectButtonClicked(int index)//이떄 퍽 인덱스를 받는다.
+    {
+
+    }
+
+    void OnPerkChooseButtonClicked(int index)
+    {
+
+    }
+
+    void OnPerkBuyButtonClicked(int index)
+    {
+
+    }
+
+    void OnPerkDisableButtonClicked(int index)
+    {
+
+    }
+
+    void HandleCharacterSelection()
+    {
+        PlayerData.currentCharacterIndex = currentCharacterIndex;
+
+        currentPerkIndexA = -1;
+        currentPerkIndexB = -1;
+
+        LastSelectedPerk = -1;
+        LastUpdatedPerkPosition = 0;
+
+        UpdateUI();
+        Debug.Log("캐릭터 변경함");
+    }
+
 }

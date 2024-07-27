@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class PerkScript : ScriptableObject
 {
     public string Name;
+    [TextArea]
     public string Description;
     public Image image;
     
