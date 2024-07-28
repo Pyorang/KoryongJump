@@ -38,9 +38,9 @@ public class DummyPlayerData : MonoBehaviour//Singleton으로 받아올 예정
 
         foreach (PerkScript script in dt.allPerk) { AvailablePerk.Add(script.defaultAvailable); }
 
-        currentCharacter = dt.allCharacter[0];
-        currentPerks[0] = dt.allPerk[0];
-        currentPerks[1] = dt.allPerk[1];//초기값 지정
+        //currentCharacter = dt.allCharacter[0];
+        //currentPerks[0] = dt.allPerk[0];
+        //currentPerks[1] = dt.allPerk[1];//초기값 지정
 
         currentCharacterIndex = 0;
         currentPerkIndexA = 0;

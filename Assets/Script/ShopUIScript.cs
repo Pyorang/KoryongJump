@@ -38,6 +38,9 @@ public class ShopUIScript : MonoBehaviour
     public Button[] PerkSelectButton;//퍽 선택 버튼(4개)
 
     [SerializeField]
+    public Image LockPerkImage;
+
+    [SerializeField]
     public TMPro.TextMeshProUGUI currentCoin;
 
     public DummyPlayerData PlayerData;//CurrentSelectedCharacterIndex, CharacterUnlockedList, PerkUnlockedList, CurrentCoin를 가져온다
@@ -89,9 +92,11 @@ public class ShopUIScript : MonoBehaviour
 
     void UpdateUI()
     {
+        
+        
         var currentCharacter = DataList.allCharacter[currentCharacterIndex];
-        var currentPerkA = DataList.allPerk[currentPerkIndexA];
-        var currentPerkB = DataList.allPerk[currentPerkIndexB];
+        var currentPerkA = currentPerkIndexA==-1?null:DataList.allPerk[currentPerkIndexA];
+        var currentPerkB = currentPerkIndexB==-1?null:DataList.allPerk[currentPerkIndexB];
 
         bool isCharacterUnlocked = PlayerData.AvailableCharacter[currentCharacterIndex];
         LockPlayerImage.gameObject.SetActive(!isCharacterUnlocked);
@@ -132,7 +137,19 @@ public class ShopUIScript : MonoBehaviour
 
         //퍽 상태 변경
 
+        LockPerkImage.gameObject.SetActive(currentCharacterIndex != PlayerData.currentCharacterIndex);
 
+        UpdatePerkSelectButton(currentCharacter.perks.ToArray());
+        if(LastSelectedPerk == -1)
+        {
+            PerkDescreption.text = "This is Perk Description";
+        }
+        else
+        {
+            PerkDescreption.text = DataList.allPerk[LastSelectedPerk].Description;
+        }
+
+        /* 퍽 이미지 변경 코드 */
 
 
         currentCoin.text = PlayerData.currentCoin.ToString();
@@ -141,6 +158,7 @@ public class ShopUIScript : MonoBehaviour
 
     void OnGoToMenuButtonClicked()
     {
+        SyncPlayerData();
         //씬 전환 함수
         Debug.Log("메인메뉴로 갔다고 상상중");
     }
@@ -190,45 +208,50 @@ public class ShopUIScript : MonoBehaviour
     }
 
 
-    void UpdatePerkSelectButton(int[] index) //퍽 인덱스를 받아서 각각 업데이트한다.
+    void UpdatePerkSelectButton(int[] index)
     {
         for (int i = 0; i < index.Length; i++)
         {
+            //Debug.Log("CurrentIndex: " + index[i]);
+            var button = PerkSelectButton[i];
+            var text = button.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+            button.onClick.RemoveAllListeners();
 
-            PerkSelectButton[i].onClick.RemoveAllListeners();
+            int TempIndex = index[i];//AddListener 내부 람다함수의 매개변수 전달 문제 해결을 위한 임시 변수
 
-            if (index[i] == -1)
+            if (index[i] == -1)// 존재하지 않는 경우
             {
-                //퍽 정보 없음.
-
-                PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "None";
-                PerkSelectButton[i].interactable = false;
+                text.text = "None";
+                button.interactable = false;
             }
             else
             {
+                bool isSelected = currentPerkIndexA == index[i] || currentPerkIndexB == index[i];
+                bool isAvailable = PlayerData.AvailablePerk[index[i]];
+                bool isLastSelected = LastSelectedPerk == index[i];
 
-                if (currentPerkIndexA == index[i] || currentPerkIndexB == index[i])//이미 선택된 퍽인 경우
+                if (isSelected)// 이미 선택된 퍽일 경우
                 {
-                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkDisableButtonClicked(index[i]); });
-                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Disable";
+                    text.text = "Disable";
+                    button.onClick.AddListener(() => OnPerkDisableButtonClicked(TempIndex));
                 }
-                else if (!PlayerData.AvailablePerk[index[i]] && LastSelectedPerk != index[i])//없는 퍽이고 선택하지 않은 경우
+                else if (!isAvailable && !isLastSelected) // 선택되지 않았고, 이용 불가능한 경우
                 {
-                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkChooseButtonClicked(index[i]); });
-                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = DataList.allPerk[index[i]].Name;
+                    text.text = DataList.allPerk[index[i]].Name;
+                    button.onClick.AddListener(() => OnPerkChooseButtonClicked(TempIndex));
                 }
-                else if (!PlayerData.AvailablePerk[index[i]])//없는 퍽이고 한번 더 누른 경우
+                else if (!isAvailable) // 선택되지 않은 경우
                 {
-                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkBuyButtonClicked(index[i]); });
-                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = DataList.allPerk[index[i]].Cost.ToString();
+                    text.text = DataList.allPerk[index[i]].Cost.ToString();
+                    button.onClick.AddListener(() => OnPerkBuyButtonClicked(TempIndex));
                 }
-                else//누른 적 없지만 가지고 있는 퍽인 경우
+                else //선택할 수 있는 경우
                 {
-                    PerkSelectButton[i].onClick.AddListener(delegate { OnPerkSelectButtonClicked(index[i]); });
-                    PerkSelectButton[i].gameObject.GetComponentInChildren<TextMeshProUGUI>().text = "Enable";
+                    text.text = "Enable";
+                    button.onClick.AddListener(() => OnPerkSelectButtonClicked(TempIndex));
                 }
 
-                PerkSelectButton[i].interactable = true;
+                button.interactable = true;
             }
         }
     }
@@ -236,21 +259,58 @@ public class ShopUIScript : MonoBehaviour
     void OnPerkSelectButtonClicked(int index)//이떄 퍽 인덱스를 받는다.
     {
 
+        if (currentPerkIndexA == -1)
+        {
+            currentPerkIndexA = index;
+        }
+        else if(currentPerkIndexB == -1)
+        {
+            currentPerkIndexB = index;
+        }
+        else
+        {
+            Debug.Log("퍽을 2개 이상 선택할 수 없습니다.");
+        }
+        LastSelectedPerk = index;
+        UpdateUI();
     }
 
-    void OnPerkChooseButtonClicked(int index)
+    void OnPerkChooseButtonClicked(int index)//그냥 퍽 선택
     {
-
+        LastSelectedPerk = index;
+        UpdateUI();
     }
 
     void OnPerkBuyButtonClicked(int index)
     {
+        if (PlayerData.currentCoin >= DataList.allPerk[index].Cost)
+        {
+            Debug.Log("퍽 구매 완료");
+            PlayerData.currentCoin -= DataList.allPerk[index].Cost;
+            PlayerData.AvailablePerk[index] = true;
+        }
+        else
+        {
+            Debug.Log("돈이 없어서 퍽 구매 못함");
+        }
 
+        LastSelectedPerk = index;
+        UpdateUI();
     }
 
-    void OnPerkDisableButtonClicked(int index)
+    void OnPerkDisableButtonClicked(int index)//선택 해제
     {
+        if(index == currentPerkIndexA)
+        {
+            currentPerkIndexA = -1;
+        }
+        else
+        {
+            currentPerkIndexB = -1;
+        }
 
+        LastSelectedPerk = index;
+        UpdateUI();
     }
 
     void HandleCharacterSelection()
@@ -265,6 +325,14 @@ public class ShopUIScript : MonoBehaviour
 
         UpdateUI();
         Debug.Log("캐릭터 변경함");
+    }
+
+    void SyncPlayerData()
+    {
+        PlayerData.currentPerkIndexA = currentPerkIndexA;
+        PlayerData.currentPerkIndexB = currentPerkIndexB;
+        PlayerData.currentCharacterIndex = currentCharacterIndex;
+        Debug.Log("데이터 동기화");
     }
 
 }
