@@ -38,10 +38,16 @@ public class ShopUIScript : MonoBehaviour
     public Button[] PerkSelectButton;//퍽 선택 버튼(4개)
 
     [SerializeField]
+    public Button PerkEnableButton;
+
+    [SerializeField]
     public Image LockPerkImage;
 
     [SerializeField]
     public TMPro.TextMeshProUGUI currentCoin;
+
+    [SerializeField]
+    public ScrollRect descriptionScroll;
 
     public DummyPlayerData PlayerData;//CurrentSelectedCharacterIndex, CharacterUnlockedList, PerkUnlockedList, CurrentCoin를 가져온다
     public DummyDataList DataList;// 퍽과 캐릭터 데이터 리스트를 가져온다.
@@ -55,6 +61,9 @@ public class ShopUIScript : MonoBehaviour
 
     public Image[] CharacterImages;
     public Image[] PerkImages;
+
+    public TextMeshProUGUI TempPerkNameTextA;
+    public TextMeshProUGUI TempPerkNameTextB;
 
     // Start is called before the first frame update
     void Start()
@@ -74,6 +83,9 @@ public class ShopUIScript : MonoBehaviour
         currentCharacterIndex = PlayerData.currentCharacterIndex;
         currentPerkIndexA = PlayerData.currentPerkIndexA;
         currentPerkIndexB = PlayerData.currentPerkIndexB;
+
+        TempPerkNameTextA = SelectedPerkA.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+        TempPerkNameTextB = SelectedPerkB.gameObject.GetComponentInChildren<TextMeshProUGUI>();
 
         LastUpdatedPerkPosition = -1;
         LastSelectedPerk = -1;
@@ -140,6 +152,7 @@ public class ShopUIScript : MonoBehaviour
         LockPerkImage.gameObject.SetActive(currentCharacterIndex != PlayerData.currentCharacterIndex);
 
         UpdatePerkSelectButton(currentCharacter.perks.ToArray());
+        UpdatePerkEnableButton();
         if(LastSelectedPerk == -1)
         {
             PerkDescreption.text = "This is Perk Description";
@@ -149,7 +162,53 @@ public class ShopUIScript : MonoBehaviour
             PerkDescreption.text = DataList.allPerk[LastSelectedPerk].Description;
         }
 
-        /* 퍽 이미지 변경 코드 */
+        LayoutRebuilder.ForceRebuildLayoutImmediate(PerkDescreption.GetComponent<RectTransform>());
+        descriptionScroll.verticalNormalizedPosition = 1f;
+
+        //퍽 이미지 변경
+        TempPerkNameTextA.gameObject.SetActive(true);
+        if (currentPerkA == null)
+        {
+            TempPerkNameTextA.text = "None";
+        }
+        else
+        {
+            if(currentPerkA.image == null)
+            {
+                TempPerkNameTextA.text = currentPerkA.Name;
+            }
+            else
+            {
+                TempPerkNameTextA.gameObject.SetActive(false);
+                SelectedPerkA = currentPerkA.image;
+            }
+        }
+
+        TempPerkNameTextB.gameObject.SetActive(true);
+        if (currentPerkB == null)
+        {
+            TempPerkNameTextB.text = "None";
+        }
+        else
+        {
+            if (currentPerkB.image == null)
+            {
+                TempPerkNameTextB.text = currentPerkB.Name;
+            }
+            else
+            {
+                TempPerkNameTextB.gameObject.SetActive(false);
+                SelectedPerkB = currentPerkB.image;
+            }
+        }
+
+        if(currentCharacterIndex != PlayerData.currentCharacterIndex)
+        {
+            TempPerkNameTextA.gameObject.SetActive(true);
+            TempPerkNameTextB.gameObject.SetActive(true);
+            TempPerkNameTextA.text = "-";
+            TempPerkNameTextB.text = "-";
+        }
 
 
         currentCoin.text = PlayerData.currentCoin.ToString();
@@ -226,34 +285,57 @@ public class ShopUIScript : MonoBehaviour
             }
             else
             {
-                bool isSelected = currentPerkIndexA == index[i] || currentPerkIndexB == index[i];
-                bool isAvailable = PlayerData.AvailablePerk[index[i]];
                 bool isLastSelected = LastSelectedPerk == index[i];
 
-                if (isSelected)// 이미 선택된 퍽일 경우
+                if (isLastSelected)
                 {
-                    text.text = "Disable";
-                    button.onClick.AddListener(() => OnPerkDisableButtonClicked(TempIndex));
+                    text.text = "Selected";
+                    button.interactable = false;
                 }
-                else if (!isAvailable && !isLastSelected) // 선택되지 않았고, 이용 불가능한 경우
+                else
                 {
                     text.text = DataList.allPerk[index[i]].Name;
-                    button.onClick.AddListener(() => OnPerkChooseButtonClicked(TempIndex));
+                    button.onClick.AddListener(()=>OnPerkChooseButtonClicked(TempIndex));
+                    button.interactable = true;
                 }
-                else if (!isAvailable) // 선택되지 않은 경우
-                {
-                    text.text = DataList.allPerk[index[i]].Cost.ToString();
-                    button.onClick.AddListener(() => OnPerkBuyButtonClicked(TempIndex));
-                }
-                else //선택할 수 있는 경우
-                {
-                    text.text = "Enable";
-                    button.onClick.AddListener(() => OnPerkSelectButtonClicked(TempIndex));
-                }
-
-                button.interactable = true;
             }
         }
+    }
+
+    void UpdatePerkEnableButton()
+    {
+
+
+        PerkEnableButton.interactable = true;
+
+        PerkEnableButton.onClick.RemoveAllListeners();
+        var text = PerkEnableButton.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+
+        if(LastSelectedPerk == -1)
+        {
+            text.text = "None";
+            PerkEnableButton.interactable = false;
+            return;
+        }
+
+        bool isSelected = currentPerkIndexA == LastSelectedPerk || currentPerkIndexB == LastSelectedPerk;
+        bool isAvailable = PlayerData.AvailablePerk[LastSelectedPerk];
+
+        if (isSelected)
+        {
+            text.text = "Disable";
+            PerkEnableButton.onClick.AddListener(() => OnPerkDisableButtonClicked(LastSelectedPerk));
+        }else if (!isAvailable)
+        {
+            text.text = DataList.allPerk[LastSelectedPerk].Cost.ToString();
+            PerkEnableButton.onClick.AddListener(() => OnPerkBuyButtonClicked(LastSelectedPerk));
+        }
+        else
+        {
+            text.text = "Enable";
+            PerkEnableButton.onClick.AddListener(() => OnPerkSelectButtonClicked(LastSelectedPerk));
+        }
+
     }
 
     void OnPerkSelectButtonClicked(int index)//이떄 퍽 인덱스를 받는다.
