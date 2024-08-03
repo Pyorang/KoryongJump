@@ -4,6 +4,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEditor.Search;
+using UnityEngine.SceneManagement;
 
 public class ShopUIScript : MonoBehaviour
 {
@@ -220,6 +221,7 @@ public class ShopUIScript : MonoBehaviour
         SyncPlayerData();
         //씬 전환 함수
         Debug.Log("메인메뉴로 갔다고 상상중");
+        //SceneManager.LoadScene("MainScene");
     }
 
     void OnNextCharacterSelectButtonClicked()
