@@ -51,6 +51,15 @@ public class SettingScreenScript : MonoBehaviour
         VolumeSlider.value = VolumeValue;
         MuteToggle.isOn = MuteToggleEnabled;
         VibrateToggle.isOn = VibrateToggleEnabled;
+
+        if (MuteToggleEnabled)
+        {
+            VolumeSlider.interactable = false;
+        }
+        else
+        {
+            VolumeSlider.interactable = true;
+        }
     }
 
     private void SetData()
@@ -76,11 +85,11 @@ public class SettingScreenScript : MonoBehaviour
         MuteToggleEnabled = MuteToggle.isOn;
         if (MuteToggleEnabled)
         {
-            VolumeSlider.enabled = false;
+            VolumeSlider.interactable = false;
         }
         else
         {
-            VolumeSlider.enabled = true;
+            VolumeSlider.interactable = true;
         }
     }
 

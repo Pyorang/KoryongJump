@@ -9,6 +9,8 @@ using UnityEngine.SceneManagement;
 public class ShopUIScript : MonoBehaviour
 {
     [SerializeField]
+    public string MainSceneName = "MainScene";
+    [SerializeField]
     public Button GoToMainButton;
     [SerializeField]
     public Button NextCharacterSelectButton;
@@ -220,8 +222,8 @@ public class ShopUIScript : MonoBehaviour
     {
         SyncPlayerData();
         //씬 전환 함수
-        Debug.Log("메인메뉴로 갔다고 상상중");
-        //SceneManager.LoadScene("MainScene");
+        //Debug.Log("메인메뉴로 갔다고 상상중");
+        SceneManager.LoadScene(MainSceneName);
     }
 
     void OnNextCharacterSelectButtonClicked()
