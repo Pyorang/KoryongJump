@@ -3,17 +3,30 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Coin
+  - Booster
+  - FootHold
+  - Magnetic
+  - Mega Booster
+  - Monster
+  - Shackles
+  - Shoes
+  - ShrinkPotion
+  - Star
+  - ThornFootHold
+  - Umbrella
+  - Ground
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Item
+  - Ground
+  - Monster
   - 
   - 
   - 

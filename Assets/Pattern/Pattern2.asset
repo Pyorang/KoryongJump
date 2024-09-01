@@ -1,0 +1,44 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf1a320d26a78bb4ab46595e63c180e7, type: 3}
+  m_Name: Pattern2
+  m_EditorClassIdentifier: 
+  patternNum: 2
+  objects:
+  - obj: {fileID: 326160409099480073, guid: 73505038f7ae42e449ea91e7fd0a5cdf, type: 3}
+    location: {x: -2, y: 0, z: 0}
+  - obj: {fileID: 5494384354558650361, guid: cc7cb7c96632c5b4f9b32c02113a7aed, type: 3}
+    location: {x: -1, y: 0, z: 0}
+  - obj: {fileID: 326160409099480073, guid: 73505038f7ae42e449ea91e7fd0a5cdf, type: 3}
+    location: {x: 0, y: 0, z: 0}
+  - obj: {fileID: 5494384354558650361, guid: cc7cb7c96632c5b4f9b32c02113a7aed, type: 3}
+    location: {x: 1, y: 0, z: 0}
+  - obj: {fileID: 326160409099480073, guid: 73505038f7ae42e449ea91e7fd0a5cdf, type: 3}
+    location: {x: 2, y: 0, z: 0}
+  - obj: {fileID: 7913901943039273520, guid: 73331074e1005d647beaf0e7acb865a8, type: 3}
+    location: {x: -1, y: 2.5, z: 0}
+  - obj: {fileID: 7913901943039273520, guid: 73331074e1005d647beaf0e7acb865a8, type: 3}
+    location: {x: 1, y: 2.5, z: 0}
+  - obj: {fileID: 8710086598293625318, guid: 303f2a16b4ad4ff40825e4a489f5ce07, type: 3}
+    location: {x: -1, y: 3.2, z: 0}
+  - obj: {fileID: 8710086598293625318, guid: 303f2a16b4ad4ff40825e4a489f5ce07, type: 3}
+    location: {x: 1, y: 3.2, z: 0}
+  - obj: {fileID: 344595956091280477, guid: 3e6acb29b45ca084f94fc9be114b09d9, type: 3}
+    location: {x: -2, y: 2, z: 0}
+  - obj: {fileID: 344595956091280477, guid: 3e6acb29b45ca084f94fc9be114b09d9, type: 3}
+    location: {x: 0, y: 2, z: 0}
+  - obj: {fileID: 344595956091280477, guid: 3e6acb29b45ca084f94fc9be114b09d9, type: 3}
+    location: {x: 2, y: 2, z: 0}
+  - obj: {fileID: 8521198079570332378, guid: af913d051eef2bf488728bc47400c83c, type: 3}
+    location: {x: -1, y: 5, z: 0}
+  - obj: {fileID: 8521198079570332378, guid: af913d051eef2bf488728bc47400c83c, type: 3}
+    location: {x: 1, y: 5, z: 0}
