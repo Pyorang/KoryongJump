@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be303bd760bddec47afd9bc1429b35fb, type: 3}
+  m_Name: Character2
+  m_EditorClassIdentifier: 
+  Name: Cha2
+  Description: Character2
+  image: {fileID: 0}
+  cost: 400
+  perks: 04000000050000000600000007000000
+  Abilities: []
+  defaultAvailable: 0
